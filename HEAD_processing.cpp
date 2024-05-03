@@ -5,6 +5,7 @@
 #include <omp.h>
 #include <vector>
 #include <gsl/gsl_multimin.h>
+#include "decon.hpp"
 using namespace std;
 
 struct data{
@@ -333,6 +334,8 @@ int main() {
         }
     }
     fclose(fp);
+
+    auto_decon();
 
     return 0;
 }
