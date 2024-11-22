@@ -99,6 +99,7 @@ void calc_F1sum(const gsl_vector* weights, void* params, vector<double>& F1_sum,
     int TD2=spec->TD2,i,j,ii;
     int TD1=spec->TD1;
     vector<double> corr_weights(TD2,0.);
+    std::fill(F1_sum.begin(), F1_sum.end(), 0.);
 
     //Looping over the basis spectra
     for(i=0;i<spec->index.size();i++){
@@ -107,12 +108,12 @@ void calc_F1sum(const gsl_vector* weights, void* params, vector<double>& F1_sum,
         int end_j= (ii+TD1/2)*((ii+TD1/2)<TD2)+(TD2-1)*((ii+TD1/2)>TD2);
 
         //looping over the data points of each basis spectrum
+        //spectrum[F1][F2], i is for F2 indices
         for(j=start_j;j<=end_j;j++){
-            F1_sum[j]=F1_sum[j] + spec->spectrum[j][ii]*abs(gsl_vector_get(weights,i));
+            iso_spec[ii]=iso_spec[ii] + spec->spectrum[j][ii]*abs(gsl_vector_get(weights,i));
         }
 
-        //saving the isotropic spectrum and weights
-        iso_spec[ii]=F1_sum[ii]*abs(gsl_vector_get(weights,i));
+        //saving the weights
         wt[ii]=abs(gsl_vector_get(weights,i));
     }
 }
@@ -335,7 +336,7 @@ int main() {
     }
     fclose(fp);
 
-    auto_decon();
+  //  auto_decon();
 
     return 0;
 }
