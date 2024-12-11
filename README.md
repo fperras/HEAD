@@ -5,7 +5,7 @@ Hahn-Echo Assisted Deconvolution (HEAD)
 
 This repository contains the Bruker pulse program for acquire 2D HEAD data in addition to the C++ program used for data processing. Data must be acquired with identical digital resolution in both dimensions. The  resulting 2D spectrum is converted to a ASCII file using the Topspin 'totxt' command. This file can be handled by the HEAD_processing program.
 
-A recent addition is a separate proigram used to enhance the resolution of a 2D spectrum using a separate 2D HEAD spectrum. Both 2D spectra must have the same F2 spectral widths and number of datapoints, with the 2D HEAD spectrum following the requirements outlined above. This program, including binary and examples, are located in the 2D-HEAD sub-directory.
+A recent addition is a separate program used to enhance the resolution of a 2D spectrum using a separate 2D HEAD spectrum. Both 2D spectra must have the same F2 spectral widths and number of datapoints, with the 2D HEAD spectrum following the requirements outlined above. This program, including binary and examples, are located in the 2D-HEAD sub-directory.
 
 A binary version of this program is provided for Windows computers. To compile it for other operating systems you must link the GNU scientific library (https://www.gnu.org/software/gsl/doc/html/) and compile as:
 
