@@ -105,7 +105,7 @@ void calc_F1sum(const gsl_vector* weights, void* params, vector<double>& F1_sum,
     for(i=0;i<spec->index.size();i++){
         ii=spec->index[i];
         int start_j= (ii-TD1/2)*(ii>=(TD1/2));
-        int end_j= (ii+TD1/2)*((ii+TD1/2)<TD2)+(TD2-1)*((ii+TD1/2)>TD2);
+        int end_j= (ii+TD1/2)*((ii+TD1/2)<TD2)+(TD2-1)*((ii+TD1/2)>=TD2);
 
         //looping over the data points of each basis spectrum
         //spectrum[F1][F2], i is for F2 indices
