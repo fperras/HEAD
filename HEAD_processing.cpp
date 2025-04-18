@@ -111,6 +111,7 @@ void calc_F1sum(const gsl_vector* weights, void* params, vector<double>& F1_sum,
         //spectrum[F1][F2], i is for F2 indices
         for(j=start_j;j<=end_j;j++){
             iso_spec[ii]=iso_spec[ii] + spec->spectrum[j][ii]*abs(gsl_vector_get(weights,i));
+            F1_sum[j]=F1_sum[j] + spec->spectrum[j][ii]*abs(gsl_vector_get(weights,i));
         }
 
         //saving the weights
