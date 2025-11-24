@@ -69,6 +69,8 @@ double RMSD(const gsl_vector* weights, void* params){
         MSD=MSD + pow(F1_sum[i]-slice[i],2.);
     }
 
+    //To avoid there being a larger lambda for the tails of the peak shapes
+    Euc_norm*=spec->hetF1_sum[spec->hetindex[spec->slice]];
     //return sqrt(MSD)+gradient;
     return sqrt(MSD)+spec->lambda*Euc_norm;
 }
