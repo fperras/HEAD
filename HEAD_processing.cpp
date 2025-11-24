@@ -28,13 +28,13 @@ double RMSD(const gsl_vector* weights, void* params){
     int TD1=spec->TD1;
     vector<double> F1_sum(TD2,0.);
     vector<double> corr_weights(TD2,0.);
-    double MSD=0., gradient=0.;
+    double MSD=0., gradient=0., Euc_norm=0.;
 
-    //Derivative of the weights, used for Tikhonov
-    for(i=1;i<spec->index.size();i++){
-        gradient+=abs(gsl_vector_get(weights,i-1)-gsl_vector_get(weights,i));
-    }
-    gradient*=spec->lambda;
+    //Derivative of the weights, used for Tikhonov, no longer used
+   // for(i=1;i<spec->index.size();i++){
+     //   gradient+=abs(gsl_vector_get(weights,i-1)-gsl_vector_get(weights,i));
+    //}
+    //gradient*=spec->lambda;
 
     //Calculation of the F1 spectrum
     //looping over the basis spectra
@@ -42,6 +42,7 @@ double RMSD(const gsl_vector* weights, void* params){
         int ii=spec->index[i];
         int start_j= (ii-TD1/2)*(ii>=(TD1/2));
         int end_j= (ii+TD1/2)*((ii+TD1/2)<TD2)+(TD2-1)*((ii+TD1/2)>TD2);
+        Euc_norm+= pow(gsl_vector_get(weights,i),2.);
 
         //looping over the data points of each basis spectrum
         for(j=start_j;j<=end_j;j++){
@@ -51,10 +52,15 @@ double RMSD(const gsl_vector* weights, void* params){
 
     //Calculation of the mean squared deviation between the calculated F1 spectrum and the F2 spectrum
     for(i=0;i<TD2;i++){
-        MSD=MSD + pow(F1_sum[i]-spec->F2_sum[i],2.);
+        MSD+= pow(F1_sum[i]-spec->F2_sum[i],2.);
     }
 
-    return sqrt(MSD)+gradient;
+    //old code
+   // return sqrt(MSD)+gradient;
+
+   //new code
+
+   return sqrt(MSD)+Euc_norm*spec->lambda;
 }
 
 void gradient(const gsl_vector *var, void *params, gsl_vector *df){
@@ -105,13 +111,12 @@ void calc_F1sum(const gsl_vector* weights, void* params, vector<double>& F1_sum,
     for(i=0;i<spec->index.size();i++){
         ii=spec->index[i];
         int start_j= (ii-TD1/2)*(ii>=(TD1/2));
-        int end_j= (ii+TD1/2)*((ii+TD1/2)<TD2)+(TD2-1)*((ii+TD1/2)>=TD2);
+        int end_j= (ii+TD1/2)*((ii+TD1/2)<TD2)+(TD2-1)*((ii+TD1/2)>TD2);
 
         //looping over the data points of each basis spectrum
         //spectrum[F1][F2], i is for F2 indices
         for(j=start_j;j<=end_j;j++){
             iso_spec[ii]=iso_spec[ii] + spec->spectrum[j][ii]*abs(gsl_vector_get(weights,i));
-            F1_sum[j]=F1_sum[j] + spec->spectrum[j][ii]*abs(gsl_vector_get(weights,i));
         }
 
         //saving the weights
