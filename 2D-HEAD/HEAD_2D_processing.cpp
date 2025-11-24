@@ -35,20 +35,20 @@ double RMSD(const gsl_vector* weights, void* params){
     int TD1=spec->TD1;
     vector<double> F1_sum(TD2,0.);
     vector<double> corr_weights(TD2,0.);
-    double MSD=0., gradient=0.;
+    double MSD=0., gradient=0., Euc_norm=0.;
      vector<double> slice(TD2,0.);
     for(i=0;i<TD2;i++){
         slice[i]=spec->hetspectrum[spec->hetindex[spec->slice]][i];
     }
 
     //Derivative of the weights, used for Tikhonov
-    for(i=1;i<spec->index.size();i++){
-        gradient+=abs(gsl_vector_get(weights,i-1)-gsl_vector_get(weights,i));
-    }
-    gradient*=spec->lambda;
+   // for(i=1;i<spec->index.size();i++){
+    //    gradient+=abs(gsl_vector_get(weights,i-1)-gsl_vector_get(weights,i));
+   // }
+   // gradient*=spec->lambda;
 
     //To avoid there being a larger lambda for the tails of the peak shapes
-    gradient*=spec->hetF1_sum[spec->hetindex[spec->slice]];
+   // gradient*=spec->hetF1_sum[spec->hetindex[spec->slice]];
 
     //Calculation of the F1 spectrum
     //looping over the basis spectra
@@ -56,6 +56,7 @@ double RMSD(const gsl_vector* weights, void* params){
         int ii=spec->index[i];
         int start_j= (ii-TD1/2)*(ii>=(TD1/2));
         int end_j= (ii+TD1/2)*((ii+TD1/2)<TD2)+(TD2-1)*((ii+TD1/2)>=TD2);
+        Euc_norm+= pow(gsl_vector_get(weights,i),2.);
 
         //looping over the data points of each basis spectrum
         for(j=start_j;j<=end_j;j++){
@@ -68,7 +69,8 @@ double RMSD(const gsl_vector* weights, void* params){
         MSD=MSD + pow(F1_sum[i]-slice[i],2.);
     }
 
-    return sqrt(MSD)+gradient;
+    //return sqrt(MSD)+gradient;
+    return sqrt(MSD)+spec->lambda*Euc_norm;
 }
 
 void gradient(const gsl_vector *var, void *params, gsl_vector *df){
