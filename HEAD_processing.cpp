@@ -250,6 +250,16 @@ int main() {
         F1_sum[i]=F1_sum[i]/max_F2;
     }
 
+    //normalizing to retain relative intensities
+    for(i=0;i<TD2;i++){
+        for(j=0;j<TD2;j++){
+            if(spec.spectrum[i][i]>0.01)
+                spec.spectrum[i][j]=spec.spectrum[i][j]/spec.spectrum[i][i];
+            else
+                 spec.spectrum[i][j]=0.;
+        }
+    }
+
     //deciding which datapoint intensities are to be optimized
     //Here a default minimum intensity of 1% is used, this can be changed.
     for(i=0;i<TD2;i++){
@@ -346,3 +356,4 @@ int main() {
 
     return 0;
 }
+
