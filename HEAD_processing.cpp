@@ -28,13 +28,13 @@ double RMSD(const gsl_vector* weights, void* params){
     int TD1=spec->TD1;
     vector<double> F1_sum(TD2,0.);
     vector<double> corr_weights(TD2,0.);
-    double MSD=0., gradient=0., Euc_norm=0.;
+    double MSD=0., gradient=0.;
 
-    //Derivative of the weights, used for Tikhonov, no longer used
-   // for(i=1;i<spec->index.size();i++){
-     //   gradient+=abs(gsl_vector_get(weights,i-1)-gsl_vector_get(weights,i));
-    //}
-    //gradient*=spec->lambda;
+    //Derivative of the weights, used for Tikhonov
+    for(i=1;i<spec->index.size();i++){
+        gradient+=abs(gsl_vector_get(weights,i-1)-gsl_vector_get(weights,i));
+    }
+    gradient*=spec->lambda;
 
     //Calculation of the F1 spectrum
     //looping over the basis spectra
@@ -42,7 +42,6 @@ double RMSD(const gsl_vector* weights, void* params){
         int ii=spec->index[i];
         int start_j= (ii-TD1/2)*(ii>=(TD1/2));
         int end_j= (ii+TD1/2)*((ii+TD1/2)<TD2)+(TD2-1)*((ii+TD1/2)>TD2);
-        Euc_norm+= pow(gsl_vector_get(weights,i),2.);
 
         //looping over the data points of each basis spectrum
         for(j=start_j;j<=end_j;j++){
@@ -52,15 +51,10 @@ double RMSD(const gsl_vector* weights, void* params){
 
     //Calculation of the mean squared deviation between the calculated F1 spectrum and the F2 spectrum
     for(i=0;i<TD2;i++){
-        MSD+= pow(F1_sum[i]-spec->F2_sum[i],2.);
+        MSD=MSD + pow(F1_sum[i]-spec->F2_sum[i],2.);
     }
 
-    //old code
-   // return sqrt(MSD)+gradient;
-
-   //new code
-
-   return sqrt(MSD)+Euc_norm*spec->lambda;
+    return sqrt(MSD)+gradient;
 }
 
 void gradient(const gsl_vector *var, void *params, gsl_vector *df){
@@ -105,7 +99,6 @@ void calc_F1sum(const gsl_vector* weights, void* params, vector<double>& F1_sum,
     int TD2=spec->TD2,i,j,ii;
     int TD1=spec->TD1;
     vector<double> corr_weights(TD2,0.);
-    std::fill(F1_sum.begin(), F1_sum.end(), 0.);
 
     //Looping over the basis spectra
     for(i=0;i<spec->index.size();i++){
@@ -114,12 +107,12 @@ void calc_F1sum(const gsl_vector* weights, void* params, vector<double>& F1_sum,
         int end_j= (ii+TD1/2)*((ii+TD1/2)<TD2)+(TD2-1)*((ii+TD1/2)>TD2);
 
         //looping over the data points of each basis spectrum
-        //spectrum[F1][F2], i is for F2 indices
         for(j=start_j;j<=end_j;j++){
-            iso_spec[ii]=iso_spec[ii] + spec->spectrum[j][ii]*abs(gsl_vector_get(weights,i));
+            F1_sum[j]=F1_sum[j] + spec->spectrum[j][ii]*abs(gsl_vector_get(weights,i));
         }
 
-        //saving the weights
+        //saving the isotropic spectrum and weights
+        iso_spec[ii]=F1_sum[ii]*abs(gsl_vector_get(weights,i));
         wt[ii]=abs(gsl_vector_get(weights,i));
     }
 }
@@ -250,16 +243,6 @@ int main() {
         F1_sum[i]=F1_sum[i]/max_F2;
     }
 
-    //normalizing to retain relative intensities
-    for(i=0;i<TD2;i++){
-        for(j=0;j<TD2;j++){
-            if(spec.spectrum[i][i]>0.01)
-                spec.spectrum[i][j]=spec.spectrum[i][j]/spec.spectrum[i][i];
-            else
-                 spec.spectrum[i][j]=0.;
-        }
-    }
-
     //deciding which datapoint intensities are to be optimized
     //Here a default minimum intensity of 1% is used, this can be changed.
     for(i=0;i<TD2;i++){
@@ -352,8 +335,7 @@ int main() {
     }
     fclose(fp);
 
-  //  auto_decon();
+    auto_decon();
 
     return 0;
 }
-
